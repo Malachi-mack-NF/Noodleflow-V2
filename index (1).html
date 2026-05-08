@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NoodleFlow — Operator Decision Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+<div class="app">
+
+<!-- ══════════════════════════ SIDEBAR ══════════════════════════ -->
+<aside class="sidebar">
+  <div class="brand">
+    <div class="lm"></div>
+    <div class="bt"><h1>NOODLEFLOW</h1><p>Decision Engine</p></div>
+  </div>
+
+  <!-- Mode toggle -->
+  <div class="mode-toggle">
+    <button class="mt-btn active" data-mode="operator">⚡ Operator</button>
+    <button class="mt-btn" data-mode="banking">🏦 Banking</button>
+  </div>
+
+  <!-- Operator nav -->
+  <div id="nav-operator">
+    <div class="ns">
+      <div class="nsl">Operate</div>
+      <button class="ni active" data-s="home">
+        <div class="ni-l"><div class="nd"></div>Home</div><small>Mission control</small>
+      </button>
+      <button class="ni" data-s="revenue">
+        <div class="ni-l"><div class="nd"></div>Revenue</div><small>$49.6K this week</small>
+      </button>
+      <button class="ni" data-s="partners">
+        <div class="ni-l"><div class="nd"></div>Partners</div><small>4 relationships</small>
+      </button>
+      <button class="ni" data-s="spend">
+        <div class="ni-l"><div class="nd"></div>Spend</div><small>3 approvals needed</small>
+      </button>
+    </div>
+    <div class="ns">
+      <div class="nsl">Intelligence</div>
+      <button class="ni" data-s="plan">
+        <div class="ni-l"><div class="nd"></div>Plan</div><small>Frameworks · Sim</small>
+      </button>
+      <button class="ni" data-s="growth">
+        <div class="ni-l"><div class="nd"></div>Growth</div><small>$4,200 deployable</small>
+      </button>
+      <button class="ni" data-s="ask">
+        <div class="ni-l"><div class="nd"></div>Ask</div><small>AI · Benchmarks</small>
+      </button>
+    </div>
+  </div>
+
+  <!-- Banking nav -->
+  <div id="nav-banking" style="display:none;">
+    <div class="ns">
+      <div class="nsl">Banking</div>
+      <button class="ni" data-s="bk-home">
+        <div class="ni-l"><div class="nd"></div>Home</div><small>Overview</small>
+      </button>
+      <button class="ni" data-s="bk-accounts">
+        <div class="ni-l"><div class="nd"></div>Accounts</div><small>4 connected</small>
+      </button>
+      <button class="ni" data-s="bk-payments">
+        <div class="ni-l"><div class="nd"></div>Payments</div><small>3 scheduled</small>
+      </button>
+      <button class="ni" data-s="bk-cards">
+        <div class="ni-l"><div class="nd"></div>Cards</div><small>2 active</small>
+      </button>
+      <button class="ni" data-s="bk-invoices">
+        <div class="ni-l"><div class="nd"></div>Invoices</div><small>7 ready to pay</small>
+      </button>
+      <button class="ni" data-s="bk-activity">
+        <div class="ni-l"><div class="nd"></div>Activity</div><small>Last 7 days</small>
+      </button>
+    </div>
+  </div>
+
+  <div class="sb-btm">
+    <div class="oc">
+      <h3>Operator mode</h3>
+      <p>What you can spend. What's reserved. What to do next.</p>
+      <button class="btn bg" style="width:100%;display:flex;justify-content:center;" id="demoBtn">Run demo</button>
+    </div>
+  </div>
+</aside>
+
+<!-- ══════════════════════════ MAIN ══════════════════════════ -->
+<main class="main">
+  <div class="topbar">
+    <div class="tl">
+      <h2 id="stitle">Mission Control</h2>
+      <p id="ssub">Available cash. Upcoming obligations. One next action.</p>
+    </div>
+    <div class="tr">
+      <button class="btn bc" data-s="plan">Simulate</button>
+      <button class="btn bc" id="createBucketBtn">+ Create reserve</button>
+      <button class="btn bp" id="nextBtn">Next →</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+  <!-- ══════════ HOME — MISSION CONTROL ══════════ -->
+  <div class="screen active" id="screen-home">
+
+    <!-- Four time horizon tiles -->
+    <div class="horizon-grid" id="horizonGrid"></div>
+
+    <!-- ONE primary recommendation -->
+    <div class="primary-rec" id="primaryRec"></div>
+
+    <!-- What changed today -->
+    <div class="changed-strip" id="changedStrip"></div>
+
+    <!-- Reserve groups + detail panel -->
+    <div class="home-body">
+      <div>
+        <div class="acct-groups" id="acctGroups">
+
+          <!-- Operating Reserves -->
+          <div class="acct-group">
+            <div class="acct-group-hdr" data-grp="ops">
+              <span class="acct-group-name">Operating Reserves</span>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span class="acct-group-sum">$30,820 reserved</span>
+                <span class="acct-caret open" id="ac-ops">▾</span>
+              </div>
+            </div>
+            <div class="acct-body open" id="ab-ops">
+              <div class="bucket-row sel" data-bk="inventory">
+                <div class="br-dot tight"></div>
+                <div class="br-name">Inventory Reserve</div>
+                <div class="br-meaning">Product restocking · 71% funded</div>
+                <div class="br-balance">$14,800</div>
+                <div class="br-status tight">Short $6,200</div>
+                <div class="br-chevron">›</div>
+              </div>
+              <div class="bucket-row" data-bk="vendors">
+                <div class="br-dot neutral"></div>
+                <div class="br-name">Vendor Reserve</div>
+                <div class="br-meaning">Invoice-matched obligations</div>
+                <div class="br-balance">$13,540</div>
+                <div class="br-status tight">3 due today</div>
+                <div class="br-chevron">›</div>
+              </div>
+              <div class="bucket-row" data-bk="commissions">
+                <div class="br-dot safe"></div>
+                <div class="br-name">Commission Reserve</div>
+                <div class="br-meaning">SKU revenue split · Ridgefield</div>
+                <div class="br-balance">$2,480</div>
+                <div class="br-status safe">Pays Friday</div>
+                <div class="br-chevron">›</div>
+              </div>
+              <div class="bucket-toolbar">
+                <button class="btn bc" style="font-size:0.75rem;padding:5px 10px;" id="createBucketBtn2">+ Add reserve</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Protected Reserves -->
+          <div class="acct-group">
+            <div class="acct-group-hdr" data-grp="prot">
+              <span class="acct-group-name">Protected Reserves</span>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span class="acct-group-sum">$21,020 auto-managed</span>
+                <span class="acct-caret open" id="ac-prot">▾</span>
+              </div>
+            </div>
+            <div class="acct-body open" id="ab-prot">
+              <div class="bucket-row" data-bk="payroll">
+                <div class="br-dot safe"></div>
+                <div class="br-name">Payroll Reserve</div>
+                <div class="br-meaning">Staff · Apr 30 obligation</div>
+                <div class="br-balance">$11,600</div>
+                <div class="br-status safe">Fully covered</div>
+                <div class="br-chevron">›</div>
+              </div>
+              <div class="bucket-row" data-bk="taxes">
+                <div class="br-dot safe"></div>
+                <div class="br-name">Tax Reserve</div>
+                <div class="br-meaning">Auto-held · 8.5% of deposits</div>
+                <div class="br-balance">$9,420</div>
+                <div class="br-status safe">On track</div>
+                <div class="br-chevron">›</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Savings -->
+          <div class="acct-group">
+            <div class="acct-group-hdr" data-grp="sav">
+              <span class="acct-group-name">Operating Buffer</span>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span class="acct-group-sum">$4,800 protected</span>
+                <span class="acct-caret" id="ac-sav">▾</span>
+              </div>
+            </div>
+            <div class="acct-body" id="ab-sav">
+              <div class="bucket-row" data-bk="buffer">
+                <div class="br-dot safe"></div>
+                <div class="br-name">Operating Buffer</div>
+                <div class="br-meaning">Emergency floor · do not deploy</div>
+                <div class="br-balance">$4,800</div>
+                <div class="br-status safe">Protected</div>
+                <div class="br-chevron">›</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Selection contract: Reserve detail panel -->
+      <div class="detail-panel" id="dp">
+        <div class="dp-context">
+          <span class="dp-context-label">Selected Reserve</span>
+          <span>·</span>
+          <span class="dp-context-name" id="dp-ctx-name">Inventory Reserve</span>
+          <button class="dp-x" id="dp-x">✕</button>
+        </div>
+        <div class="dp-hdr">
+          <div class="dp-title" id="dp-title">Inventory Reserve</div>
+          <div class="dp-sub"   id="dp-sub">Reserved for your Apr 26 restock. 71% funded, short $6,200.</div>
+        </div>
+        <div class="dp-body" id="dp-body"></div>
+      </div>
+    </div>
+  </div><!-- /screen-home -->
+
+  <!-- ══════════ REVENUE ══════════ -->
+  <div class="screen" id="screen-revenue">
+    <div class="rev-kpis">
+      <div class="kpi"><div class="kpi-lbl">Revenue this week</div><div class="kpi-v">$49,600</div><div class="kpi-s">↑ 14% vs last week</div></div>
+      <div class="kpi"><div class="kpi-lbl">Liquidity contribution</div><div class="kpi-v">$33,300</div><div class="kpi-s">67% · after reserves &amp; fees</div></div>
+      <div class="kpi"><div class="kpi-lbl">Real Cash balance</div><div class="kpi-v">$88,540</div><div class="kpi-s">Deposited · allocated</div></div>
+      <div class="kpi"><div class="kpi-lbl">Available now</div><div class="kpi-v">$42,380</div><div class="kpi-s">After all reserves</div></div>
+    </div>
+
+    <!-- Channel performance -->
+    <div class="ch-perf-card">
+      <div class="ch-perf-hdr">
+        <div><h3>Channel Liquidity Performance</h3><p>Gross revenue vs. what actually becomes Available after fees, reserves, and obligations.</p></div>
+      </div>
+      <div class="ch-table-hdr">
+        <span>Channel</span><span>Gross</span><span>Liquidity</span><span>Contribution %</span><span>Trend</span>
+      </div>
+      <div id="chPerfBody"></div>
+    </div>
+
+    <div class="rev-layout">
+      <div class="plat-list" id="platList">
+        <div style="font-size:0.65rem;color:var(--t4);text-transform:uppercase;letter-spacing:0.16em;padding:0 2px 7px;">Platforms</div>
+      </div>
+      <div class="deal-card">
+        <div class="dc-hdr">
+          <div><h3 id="dealTitle">Shopify — Orders</h3><p id="dealSub">Select an order to see SKU breakdown and Available contribution.</p></div>
+          <div class="badge bsafe" id="dealBadge">$24,200</div>
+        </div>
+        <div class="deal-list" id="dealList"></div>
+      </div>
+      <!-- SKU panel — selection contract label updated -->
+      <div class="sku-panel">
+        <div class="sku-ph" style="background:var(--c3);border-bottom:1px solid var(--b1);">
+          <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.16em;color:var(--t4);margin-bottom:3px;">Selected Order</div>
+          <h3 id="skuTitle">Order #SHP-4471</h3>
+          <p  id="skuSub">Apr 17 · Shopify · 3 SKUs · $8,400 gross</p>
+        </div>
+        <div class="sku-pb" id="skuBody"></div>
+      </div>
+    </div>
+
+    <!-- NoodleFlow Links -->
+    <div class="nf-links">
+      <div class="nf-links-hdr">
+        <div class="nf-links-hdr-top">
+          <div class="nf-links-title">NoodleFlow Links</div>
+          <div class="nf-badge">⚡ New</div>
+        </div>
+        <div class="nf-links-sub">Instant purchase links for any product — no cart, no storefront. Revenue, reserves, and forecasts update on every purchase.</div>
+      </div>
+      <div class="nf-links-body">
+        <div class="nf-field">
+          <div class="nf-label">Select product</div>
+          <select class="nf-select" id="nfProductSelect">
+            <option value="NF-RIDGE-01">Ridgefield Pro Bundle — $89 · 72.5% margin</option>
+            <option value="NF-PACK-02">Packaging Essentials Kit — $34 · 73.5% margin</option>
+            <option value="NF-LABEL-03">Label &amp; Finish Pack — $22 · 77.5% margin</option>
+          </select>
+        </div>
+        <div class="nf-field">
+          <div class="nf-label">Link type</div>
+          <div class="nf-types">
+            <button class="nf-type nf-type-btn active" data-type="social">📱 Social post</button>
+            <button class="nf-type nf-type-btn" data-type="sms">💬 SMS</button>
+            <button class="nf-type nf-type-btn" data-type="qr">⬛ QR code</button>
+            <button class="nf-type nf-type-btn" data-type="email">✉️ Email</button>
+            <button class="nf-type nf-type-btn" data-type="lp">🔗 Landing page</button>
+          </div>
+        </div>
+        <button class="btn bp" style="width:100%;display:flex;justify-content:center;margin-top:4px;" id="generateLinkBtn">Generate link</button>
+        <div class="nf-link-output" id="nfLinkOutput"></div>
+        <div class="nf-impact" id="nfImpact"></div>
+      </div>
+    </div>
+  </div><!-- /screen-revenue -->
+
+  <!-- ══════════ PARTNERS ══════════ -->
+  <div class="screen" id="screen-partners">
+    <div class="partners-layout">
+      <div class="partners-card">
+        <div class="partners-hdr">
+          <div><h3>Partner Relationships</h3><p>Supplier, vendor, agency, and affiliate intelligence — spend, terms, risk concentration, and ROI.</p></div>
+          <button class="btn bg" style="font-size:0.79rem;padding:7px 12px;">+ Add partner</button>
+        </div>
+        <div class="partners-table-hdr">
+          <span>Partner</span><span>Annual Spend</span><span>Next Obligation</span><span>Risk</span><span>ROI</span>
+        </div>
+        <div id="partnersBody"></div>
+      </div>
+
+      <!-- Partner detail panel — selection contract -->
+      <div class="partner-detail">
+        <div class="pd-ctx">
+          <span class="pd-ctx-label">Selected Partner</span>
+          <span>·</span>
+          <span class="pd-ctx-name" id="pd-ctx-name">Northline Packaging</span>
+        </div>
+        <div class="pd-hdr">
+          <div class="pd-title" id="pd-title">Northline Packaging</div>
+          <div class="pd-sub"   id="pd-sub">Supplier · Packaging &amp; Materials</div>
+        </div>
+        <div class="pd-body" id="pd-body"></div>
+      </div>
+    </div>
+  </div><!-- /screen-partners -->
+
+  <!-- ══════════ SPEND ══════════ -->
+  <div class="screen" id="screen-spend">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;">
+      <div class="spend-tabs">
+        <button class="stab active" data-panel="invoices">Invoices</button>
+        <button class="stab"        data-panel="receipts">Receipt capture</button>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn bc" style="font-size:0.8rem;">Upload receipt</button>
+        <button class="btn bg" style="font-size:0.8rem;">invoice@noodleflow.ai</button>
+      </div>
+    </div>
+
+    <!-- Invoices panel -->
+    <div class="spend-panel active" id="spend-panel-invoices">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:11px;">
+        <div class="kpi"><div class="kpi-lbl">Received</div><div class="kpi-v">24</div></div>
+        <div class="kpi"><div class="kpi-lbl">Ready to pay</div><div class="kpi-v">7</div></div>
+        <div class="kpi"><div class="kpi-lbl">Unfunded</div><div class="kpi-v" style="color:var(--risk);">1</div></div>
+        <div class="kpi"><div class="kpi-lbl">Paid this week</div><div class="kpi-v">11</div></div>
+      </div>
+      <div class="inv-layout">
+        <div class="inv-card">
+          <div class="inv-hdr">
+            <div><h3>Invoice Inbox</h3><p>Emailed to Noodleflow → tracked, matched, routed from the right reserve.</p></div>
+          </div>
+          <div class="inv-table-hdr">
+            <span>Vendor</span><span>Status</span><span>Recorded</span><span>Reserve</span><span style="text-align:right;">Amount</span>
+          </div>
+          <div class="inv-item sel" data-inv="northline">
+            <div><div class="inv-vendor">Northline Packaging</div><div class="inv-due">Due Apr 22</div></div>
+            <div class="badge btight">Ready to pay</div>
+            <div style="font-size:0.79rem;color:var(--t2);">Yes</div>
+            <div style="font-size:0.79rem;color:var(--t2);">Inventory</div>
+            <div class="inv-amt">$4,280</div>
+          </div>
+          <div class="inv-item" data-inv="peak">
+            <div><div class="inv-vendor">Peak Logistics</div><div class="inv-due">Due Apr 21</div></div>
+            <div class="badge binfo">Waiting approval</div>
+            <div style="font-size:0.79rem;color:var(--t2);">Yes</div>
+            <div style="font-size:0.79rem;color:var(--t2);">Vendor</div>
+            <div class="inv-amt">$1,920</div>
+          </div>
+          <div class="inv-item" data-inv="bright">
+            <div><div class="inv-vendor">Bright Market Agency</div><div class="inv-due">Due Apr 25</div></div>
+            <div class="badge brisk">Unfunded</div>
+            <div style="font-size:0.79rem;color:var(--t2);">Yes</div>
+            <div style="font-size:0.79rem;color:var(--risk);">No reserve</div>
+            <div class="inv-amt">$10,000</div>
+          </div>
+          <div class="inv-item" data-inv="summit">
+            <div><div class="inv-vendor">Summit Labels</div><div class="inv-due">Apr 30</div></div>
+            <div class="badge bsafe">Paid</div>
+            <div style="font-size:0.79rem;color:var(--t2);">Yes</div>
+            <div style="font-size:0.79rem;color:var(--t2);">Inventory</div>
+            <div class="inv-amt">$2,860</div>
+          </div>
+        </div>
+
+        <!-- Invoice detail panel — selection contract -->
+        <div class="detail-panel" id="invPanel" style="position:relative;">
+          <div class="dp-context">
+            <span class="dp-context-label">Selected Invoice</span>
+            <span>·</span>
+            <span class="dp-context-name" id="inv-ctx">Northline Packaging</span>
+          </div>
+          <div class="dp-hdr">
+            <div class="dp-title" id="invTitle">Northline Packaging</div>
+            <div class="dp-sub"   id="invSub">PO-linked packaging · Inventory Reserve</div>
+          </div>
+          <div class="dp-body" id="invBody" style="padding:13px 16px;"></div>
+          <div class="badge btight" id="invBadge" style="position:absolute;top:12px;right:14px;">Ready to pay</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Receipt capture panel -->
+    <div class="spend-panel" id="spend-panel-receipts">
+      <div class="receipt-zone" id="receiptDropZone">
+        <div class="receipt-zone-icon">📎</div>
+        <div class="receipt-zone-title">Drop receipts here</div>
+        <div class="receipt-zone-sub">
+          Drag and drop, click to upload, or forward to <strong style="color:var(--blue);">receipts@noodleflow.ai</strong><br>
+          Noodleflow OCRs, matches to transactions, and flags missing receipts automatically.
+        </div>
+      </div>
+      <div class="receipt-list">
+        <div class="receipt-list-hdr">
+          <h3>Recent transactions</h3>
+          <span style="font-size:0.74rem;color:var(--tight);">1 unmatched receipt</span>
+        </div>
+        <div id="receiptListBody"></div>
+      </div>
+    </div>
+  </div><!-- /screen-spend -->
+
+  <!-- ══════════ PLAN ══════════ -->
+  <div class="screen" id="screen-plan">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;">
+      <div class="plan-tabs">
+        <button class="ptab active" data-panel="frameworks">Frameworks</button>
+        <button class="ptab"        data-panel="simulate">Simulate</button>
+      </div>
+      <button class="btn bg" id="simCreateBucket" style="font-size:0.82rem;">+ Create reserve</button>
+    </div>
+
+    <!-- FRAMEWORKS panel -->
+    <div class="plan-panel active" id="plan-panel-frameworks">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px;">
+        <div>
+          <div style="font-size:0.9rem;font-weight:600;margin-bottom:4px;">Choose your operating architecture</div>
+          <div style="font-size:0.82rem;color:var(--t3);line-height:1.5;">Install a reserve framework that matches how you run your business. Sub-reserve templates and AI recommendations included.</div>
+        </div>
+        <button class="btn bc" style="font-size:0.79rem;flex:0 0 auto;" onclick="toast('Community','Browsing community frameworks — 12,400+ operators and growing.')">Browse community</button>
+      </div>
+
+      <div class="fw-grid" id="fwGrid"></div>
+
+      <div class="fw-detail-layout">
+        <div class="fw-detail-card">
+          <div class="fw-detail-hdr">
+            <div>
+              <h3 id="fwDetailTitle">Ecommerce Operator</h3>
+              <p  id="fwDetailDesc">Built for product businesses. Prioritizes inventory, media, and margin protection.</p>
+            </div>
+            <div style="display:flex;gap:8px;flex:0 0 auto;">
+              <button class="btn bp" style="font-size:0.82rem;" onclick="toast('Framework installed','Ecommerce Operator framework is now active. Reserves will be created automatically.')">Install</button>
+              <button class="btn bc" style="font-size:0.82rem;" onclick="showBucketModal()">Customize</button>
+            </div>
+          </div>
+          <div class="reserve-tree" id="reserveTree"></div>
+        </div>
+
+        <!-- AI recommendation panel -->
+        <div class="ai-rec-card">
+          <div class="ai-rec-hdr">
+            <div class="ai-rec-title">Noodleflow analysis</div>
+            <div class="ai-rec-sub">Based on your business profile, channels, and current reserve structure.</div>
+          </div>
+          <div id="fwAiRec"></div>
+          <div style="padding:0 16px 14px;display:flex;gap:8px;">
+            <button class="btn bg" style="font-size:0.8rem;padding:7px 12px;" onclick="goScreen('ask')">Ask about this</button>
+            <button class="btn bc" style="font-size:0.8rem;padding:7px 11px;" onclick="toast('AI Framework','Noodleflow is generating a custom framework based on your business profile.')">AI-generate mine</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIMULATE panel -->
+    <div class="plan-panel" id="plan-panel-simulate">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;">
+        <div class="sim-mode-tabs">
+          <button class="smt active" id="smt-guided">Guided scenarios</button>
+          <button class="smt"        id="smt-custom">Custom model</button>
+        </div>
+      </div>
+
+      <!-- Guided -->
+      <div class="sim-guided" id="sim-guided-panel">
+        <div class="sim-picks">
+          <button class="sp active" data-sim="marketing">
+            <div class="sp-q">Can I spend $10K on marketing?</div>
+            <div class="sp-h">Campaign vs. current obligations</div>
+          </button>
+          <button class="sp" data-sim="inventory">
+            <div class="sp-q">Can I cover the Apr 26 inventory order?</div>
+            <div class="sp-h">Restock funding check</div>
+          </button>
+          <button class="sp" data-sim="delay">
+            <div class="sp-q">What if I delay Northline 5 days?</div>
+            <div class="sp-h">Hold $4,280 · tradeoff analysis</div>
+          </button>
+          <button class="sp" data-sim="payroll">
+            <div class="sp-q">Am I safe for Apr 30 payroll?</div>
+            <div class="sp-h">Coverage + buffer check</div>
+          </button>
+        </div>
+        <div class="seq" id="seqCanvas">
+          <div class="seq-hdrs" id="seqHdrs"></div>
+          <div class="seq-nodes" id="seqNodes"></div>
+          <svg class="seq-svg" id="seqSvg"></svg>
+          <div class="seq-res" id="seqRes">
+            <div>
+              <div class="sr-lbl">Available changes from → to</div>
+              <div class="sr-from" id="srFrom"></div>
+              <div class="sr-to"   id="srTo"></div>
+            </div>
+            <div class="sr-rec" id="srRec"></div>
+            <div style="display:flex;gap:8px;flex:0 0 auto;">
+              <button class="btn bp" data-s="ask">Ask Noodleflow</button>
+              <button class="btn bg" data-s="growth">Optimize</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Custom sim -->
+      <div class="sim-custom" id="sim-custom-panel" style="display:none;">
+        <div class="sim-custom-grid">
+          <div class="sc-card">
+            <h4>Change a variable</h4>
+            <div class="sc-field">
+              <div class="sc-label">What are you modeling?</div>
+              <select class="sc-select" id="sc-type">
+                <option>Spend from operating cash</option>
+                <option>Add a new employee</option>
+                <option>Increase inventory order</option>
+                <option>Stop a product line</option>
+                <option>Change reserve rate</option>
+                <option>Move budget between reserves</option>
+              </select>
+            </div>
+            <div class="sc-field">
+              <div class="sc-label">Amount ($)</div>
+              <input class="sc-input" type="number" id="sc-amount" value="10000" placeholder="Enter amount"/>
+            </div>
+            <div class="sc-field">
+              <div class="sc-label">Timing</div>
+              <select class="sc-select" id="sc-timing">
+                <option>This week (before 4/24)</option>
+                <option>After 4/24 deposit</option>
+                <option>After Apr 30 payroll</option>
+                <option>Next month</option>
+              </select>
+            </div>
+            <button class="btn bp" style="width:100%;justify-content:center;display:flex;margin-top:4px;" id="runCustomSim">Run simulation</button>
+          </div>
+          <div class="sc-card">
+            <h4>Adjust reserve sensitivity</h4>
+            <div class="sc-field">
+              <div class="sc-label">Inventory holdback <span class="sc-slider-val" id="sv-inv">14%</span></div>
+              <div class="sc-slider-wrap">
+                <input type="range" class="sc-slider" min="8" max="25" value="14" id="sl-inv"/>
+              </div>
+            </div>
+            <div class="sc-field">
+              <div class="sc-label">Tax holdback <span class="sc-slider-val" id="sv-tax">8.5%</span></div>
+              <div class="sc-slider-wrap">
+                <input type="range" class="sc-slider" min="5" max="15" value="8" step="0.5" id="sl-tax"/>
+              </div>
+            </div>
+            <div class="sc-field">
+              <div class="sc-label">Commission rate <span class="sc-slider-val" id="sv-comm">5%</span></div>
+              <div class="sc-slider-wrap">
+                <input type="range" class="sc-slider" min="2" max="15" value="5" id="sl-comm"/>
+              </div>
+            </div>
+            <div style="padding:11px;border-radius:9px;background:var(--c3);border:1px solid var(--b1);margin-top:7px;">
+              <div class="sr-lbl" style="margin-bottom:5px;">Live Available</div>
+              <div style="display:flex;justify-content:space-between;font-size:0.84rem;">
+                <span style="color:var(--t2);">After adjustment</span>
+                <span class="sr-to safe" style="font-size:1.2rem;" id="liveToSpend">$42,380</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="seq-res" id="customSimResult" style="display:none;">
+          <div>
+            <div class="sr-lbl">Simulated result</div>
+            <div class="sr-from" id="csr-from"></div>
+            <div class="sr-to"   id="csr-to"></div>
+          </div>
+          <div class="sr-rec" id="csr-rec"></div>
+          <div style="display:flex;gap:8px;flex:0 0 auto;">
+            <button class="btn bp" data-s="ask">Ask Noodleflow</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /screen-plan -->
+
+  <!-- ══════════ GROWTH ══════════ -->
+  <div class="screen" id="screen-growth">
+    <div class="growth-surplus-bar" id="growthSurplusBar"></div>
+    <div class="growth-layout">
+      <div class="growth-opps" id="growthOpps"></div>
+      <div class="growth-benchmarks" id="growthBenchmarks"></div>
+    </div>
+  </div><!-- /screen-growth -->
+
+  <!-- ══════════ ASK ══════════ -->
+  <div class="screen" id="screen-ask">
+    <div class="ask-layout">
+      <div class="chat-card">
+        <div class="chat-hdr">
+          <h3>Ask Noodleflow</h3>
+          <p>Operator-language answers. Benchmarks, patterns, and inference — not directive financial advice.</p>
+        </div>
+        <div class="chat-msgs" id="chatMsgs">
+          <div class="cb user">Can I spend <strong>$10,000</strong> on marketing this Friday?</div>
+          <div class="cb ai">
+            <strong>Not safely yet.</strong><br><br>
+            Spending $10K today drops Inventory Reserve below the Apr 26 restock obligation by $6,200 and compresses payroll buffer to $900 — below your $3,200 safe floor. Wait until the 4/24 Amazon deposit clears. Same spend, no reserve impact.<br><br>
+            <em style="color:var(--t3);font-size:0.9em;">Operators at your volume typically maintain 18–22% of Available as a discretionary floor before committing to new spend.</em>
+          </div>
+        </div>
+        <div class="chat-in">
+          <div class="chat-sh">
+            <div class="chat-fi" id="chatFi" contenteditable="true">Ask about Available, reserves, or what happens next…</div>
+          </div>
+          <button class="btn bp" id="chatSend">Send</button>
+        </div>
+      </div>
+      <div class="chat-side">
+        <div class="cps">
+          <div class="cps-h">Try asking</div>
+          <div class="cp-item" data-p="What can I safely spend this week?">What can I safely spend this week?</div>
+          <div class="cp-item" data-p="Which vendors should be paid today?">Which vendors should be paid today?</div>
+          <div class="cp-item" data-p="Why is inventory tight?">Why is inventory tight?</div>
+          <div class="cp-item" data-p="How much of Amazon goes to taxes?">How much of Amazon goes to taxes?</div>
+          <div class="cp-item" data-p="What if I delay the payroll bonus?">What if I delay the payroll bonus?</div>
+        </div>
+        <div class="cps">
+          <div class="cps-h">Best for</div>
+          <div class="cp-item" style="cursor:default;opacity:0.5;">Benchmarks &amp; patterns</div>
+          <div class="cp-item" style="cursor:default;opacity:0.5;">Why a number changed</div>
+          <div class="cp-item" style="cursor:default;opacity:0.5;">Complex what-if reasoning</div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /screen-ask -->
+
+  <!-- ══════════════ BANKING SCREENS ══════════════ -->
+
+  <!-- BK HOME -->
+  <div class="screen" id="screen-bk-home">
+    <div id="bkHomeSummary"></div>
+  </div>
+
+  <!-- BK ACCOUNTS -->
+  <div class="screen" id="screen-bk-accounts">
+    <div class="bk-account-grid">
+      <!-- Rendered by renderBkHome() — reuse same cards via JS or static -->
+      <div class="bk-acct-card primary">
+        <div class="bk-acct-eye">Checking</div>
+        <div class="bk-acct-name">Business Checking</div>
+        <div class="bk-acct-num">····  4821</div>
+        <div class="bk-acct-bal">$62,140</div>
+        <div class="bk-acct-status primary">Primary operating account</div>
+      </div>
+      <div class="bk-acct-card">
+        <div class="bk-acct-eye">Savings</div>
+        <div class="bk-acct-name">Business Savings</div>
+        <div class="bk-acct-num">····  7703</div>
+        <div class="bk-acct-bal">$24,800</div>
+        <div class="bk-acct-status yield">4.7% APY · High-yield savings</div>
+      </div>
+      <div class="bk-acct-card">
+        <div class="bk-acct-eye">Reserve</div>
+        <div class="bk-acct-name">Operating Reserve</div>
+        <div class="bk-acct-num">····  3390</div>
+        <div class="bk-acct-bal">$4,800</div>
+        <div class="bk-acct-status locked">Locked · Emergency only</div>
+      </div>
+      <div class="bk-acct-card">
+        <div class="bk-acct-eye">Credit</div>
+        <div class="bk-acct-name">Business Credit Line</div>
+        <div class="bk-acct-num">····  9911</div>
+        <div class="bk-acct-bal">$40,000</div>
+        <div class="bk-acct-status available">Available credit</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BK PAYMENTS -->
+  <div class="screen" id="screen-bk-payments">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="bk-activity-card">
+        <div class="bk-act-hdr"><h3>Connected payees</h3><button class="btn bg" style="font-size:0.79rem;padding:7px 11px;" id="inviteBtn">Invite payee</button></div>
+        <div class="bk-act-item"><div class="bk-act-left"><div class="bk-act-desc">Northline Packaging</div><div class="bk-act-meta">ACH · Net 15 <span class="bk-act-cat">Supplier</span></div></div><div class="badge bsafe">Connected</div></div>
+        <div class="bk-act-item"><div class="bk-act-left"><div class="bk-act-desc">Peak Logistics</div><div class="bk-act-meta">ACH · Auto-pay on <span class="bk-act-cat">Vendor</span></div></div><div class="badge bsafe">Connected</div></div>
+        <div class="bk-act-item"><div class="bk-act-left"><div class="bk-act-desc">Bright Market Agency</div><div class="bk-act-meta">Not invited yet <span class="bk-act-cat">Agency</span></div></div><button class="btn bg sinv" style="font-size:0.77rem;padding:6px 10px;">Send invite</button></div>
+        <div class="bk-act-item"><div class="bk-act-left"><div class="bk-act-desc">Ridgefield Sales Rep</div><div class="bk-act-meta">Commission · weekly <span class="bk-act-cat">Affiliate</span></div></div><div class="badge bsafe">Connected</div></div>
+      </div>
+      <div class="bk-activity-card">
+        <div class="bk-act-hdr"><h3>Scheduled payments</h3></div>
+        <div class="bk-act-item"><div class="bk-act-left"><div class="bk-act-desc">Peak Logistics</div><div class="bk-act-meta">Vendor Reserve · Apr 21 @ 9AM <span class="bk-act-cat">Auto</span></div></div><div><div class="bk-act-amt neg">–$1,920</div><button class="btn bc pc" style="font-size:0.75rem;padding:4px 9px;margin-top:4px;">Override</button></div></div>
+        <div class="bk-act-item"><div class="bk-act-left"><div class="bk-act-desc">Northline Packaging</div><div class="bk-act-meta">Inventory Reserve · Apr 22 <span class="bk-act-cat">Needs confirmation</span></div></div><div><div class="bk-act-amt neg">–$4,280</div><button class="btn bp pc" style="font-size:0.75rem;padding:4px 9px;margin-top:4px;">Confirm</button></div></div>
+        <div class="bk-act-item"><div class="bk-act-left"><div class="bk-act-desc">Ridgefield Sales Rep</div><div class="bk-act-meta">Commission Reserve · Weekly <span class="bk-act-cat">Rule-based</span></div></div><div class="bk-act-amt neg">–$2,480</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BK CARDS -->
+  <div class="screen" id="screen-bk-cards">
+    <div class="bk-cards-grid" id="bkCardsGrid"></div>
+  </div>
+
+  <!-- BK INVOICES -->
+  <div class="screen" id="screen-bk-invoices">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:4px;">
+      <div class="kpi"><div class="kpi-lbl">Received</div><div class="kpi-v">24</div></div>
+      <div class="kpi"><div class="kpi-lbl">In accounting</div><div class="kpi-v">18</div></div>
+      <div class="kpi"><div class="kpi-lbl">Ready to pay</div><div class="kpi-v">7</div></div>
+      <div class="kpi"><div class="kpi-lbl">Paid this week</div><div class="kpi-v">11</div></div>
+    </div>
+    <div class="bk-activity-card">
+      <div class="bk-act-hdr"><h3>Invoice Inbox</h3><button class="btn bg" style="font-size:0.79rem;padding:7px 11px;">invoice@noodleflow.ai</button></div>
+      <div class="bk-act-item"><div class="bk-act-left"><div class="bk-act-desc">Northline Packaging</div><div class="bk-act-meta">Due Apr 22 <span class="bk-act-cat">Inventory</span></div></div><div><div class="badge btight">Ready to pay</div><div class="bk-act-amt neg" style="margin-top:4px;">$4,280</div></div></div>
+      <div class="bk-act-item"><div class="bk-act-left"><div class="bk-act-desc">Peak Logistics</div><div class="bk-act-meta">Due Apr 21 <span class="bk-act-cat">Vendor</span></div></div><div><div class="badge binfo">Approval needed</div><div class="bk-act-amt neg" style="margin-top:4px;">$1,920</div></div></div>
+      <div class="bk-act-item"><div class="bk-act-left"><div class="bk-act-desc">Bright Market Agency</div><div class="bk-act-meta">Due Apr 25 <div class="bk-no-receipt">⚠ No reserve</div></div></div><div><div class="badge brisk">Unfunded</div><div class="bk-act-amt neg" style="margin-top:4px;">$10,000</div></div></div>
+      <div class="bk-act-item"><div class="bk-act-left"><div class="bk-act-desc">Summit Labels</div><div class="bk-act-meta">Apr 18 <span class="bk-act-cat">Inventory</span></div></div><div><div class="badge bsafe">Paid</div><div class="bk-act-amt neg" style="margin-top:4px;">$2,860</div></div></div>
+    </div>
+  </div>
+
+  <!-- BK ACTIVITY -->
+  <div class="screen" id="screen-bk-activity">
+    <div class="bk-activity-card">
+      <div class="bk-act-hdr">
+        <h3>Transaction activity</h3>
+        <span style="font-size:0.76rem;color:var(--tight);">1 transaction missing receipt</span>
+      </div>
+      <div id="bkActivityList"></div>
+    </div>
+  </div>
+
+  </div><!-- /content -->
+</main>
+</div>
+
+<!-- ════ BUCKET / RESERVE CREATION MODAL ════ -->
+<div class="modal-ov" id="bucketModal">
+  <div class="modal">
+    <div class="modal-title">Create a new reserve</div>
+    <div class="modal-sub">Choose how you want to set it up. Assisted lets Noodleflow recommend the right structure based on your goal.</div>
+
+    <div id="bm-step0">
+      <div class="mode-cards">
+        <div class="mode-card active" id="mc-assisted">
+          <div class="mode-icon">🧠</div>
+          <div class="mode-name">Assisted setup</div>
+          <div class="mode-desc">Tell Noodleflow what you're trying to do. It recommends the structure, funding source, and tradeoffs.</div>
+        </div>
+        <div class="mode-card" id="mc-manual">
+          <div class="mode-icon">⚙️</div>
+          <div class="mode-name">Manual setup</div>
+          <div class="mode-desc">Define the reserve yourself. Noodleflow warns you which existing reserves may be impacted before you confirm.</div>
+        </div>
+      </div>
+      <div class="modal-acts">
+        <button class="btn bp" id="bm-next0" style="flex:1;justify-content:center;display:flex;">Continue</button>
+        <button class="btn bg" id="bm-cancel">Cancel</button>
+      </div>
+    </div>
+
+    <div class="assist-step" id="bm-a1">
+      <div class="assist-q">What are you trying to do?</div>
+      <div class="intent-grid">
+        <div class="intent-opt active" data-intent="inventory"><div class="intent-icon">📦</div><div class="intent-lbl">Buy more product</div></div>
+        <div class="intent-opt"        data-intent="marketing"><div class="intent-icon">📣</div><div class="intent-lbl">Run a campaign</div></div>
+        <div class="intent-opt"        data-intent="hire">     <div class="intent-icon">👤</div><div class="intent-lbl">Hire someone</div></div>
+        <div class="intent-opt"        data-intent="invest">   <div class="intent-icon">📈</div><div class="intent-lbl">Set aside for investment</div></div>
+        <div class="intent-opt"        data-intent="owner">    <div class="intent-icon">💸</div><div class="intent-lbl">Increase owner draw</div></div>
+        <div class="intent-opt"        data-intent="other">    <div class="intent-icon">✏️</div><div class="intent-lbl">Something else</div></div>
+      </div>
+      <div class="modal-acts" style="margin-top:7px;">
+        <button class="btn bp" id="bm-a1-next" style="flex:1;justify-content:center;display:flex;">See recommendation</button>
+        <button class="btn bg" id="bm-a1-back">Back</button>
+      </div>
+    </div>
+
+    <div class="assist-step" id="bm-a2">
+      <div class="assist-rec-card">
+        <h4 id="ar-title">Noodleflow recommends: Marketing Reserve</h4>
+        <p  id="ar-desc">Fund from Amazon deposits after other reserves. Target: $10,000. Timeline: ~3–4 weeks. Reduces Available ~$420/week during funding.</p>
+        <div class="assist-rec-impacts">
+          <div class="ari"><span>Impact on Available</span><span style="color:var(--tight);">–$420/week during funding</span></div>
+          <div class="ari"><span>Impact on Inventory</span><span style="color:var(--safe);">No change</span></div>
+          <div class="ari"><span>Funding source</span><span>Amazon deposits (after allocations)</span></div>
+          <div class="ari"><span>Ready to use</span><span>~Apr 30 at current pace</span></div>
+        </div>
+      </div>
+      <div class="modal-acts" style="margin-top:4px;">
+        <button class="btn bp" id="bm-a2-create" style="flex:1;justify-content:center;display:flex;">Create this reserve</button>
+        <button class="btn bg" id="bm-a2-back">Back</button>
+      </div>
+    </div>
+
+    <div class="manual-step" id="bm-m1">
+      <div class="sc-field"><div class="sc-label">Reserve name</div><input class="sc-input" placeholder="e.g. Marketing Reserve" id="m-name"/></div>
+      <div class="sc-field">
+        <div class="sc-label">Funding source</div>
+        <select class="sc-select" id="m-source">
+          <option>Amazon deposits (after other allocations)</option>
+          <option>Shopify deposits (after other allocations)</option>
+          <option>All product revenue</option>
+          <option>Manual transfer only</option>
+        </select>
+      </div>
+      <div class="sc-field"><div class="sc-label">Holdback rate (%)</div><input class="sc-input" type="number" placeholder="e.g. 5" id="m-rate"/></div>
+      <div class="warn-card">
+        <h4>⚠ Impact warning</h4>
+        <p>Adding a new reserve drawing from Amazon deposits will reduce Available by approximately $280–$420/week depending on your configured rate. Existing reserves are unaffected.</p>
+      </div>
+      <div class="modal-acts">
+        <button class="btn bp" id="bm-m1-create" style="flex:1;justify-content:center;display:flex;">Confirm &amp; create</button>
+        <button class="btn bg" id="bm-m1-back">Back</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Cover Gap Modal -->
+<div class="modal-ov" id="gapModal">
+  <div class="modal gap-modal">
+    <div class="modal-title">Cover the $6,200 gap</div>
+    <div class="modal-sub">Move funds from a connected account to fully fund the Inventory Reserve before the Apr 26 obligation.</div>
+    <div class="ms active" data-src="sav"><div><div class="ms-name">Business Savings</div><div class="ms-bal">Available: $24,800</div></div><div class="ms-amt">$6,200</div></div>
+    <div class="ms"        data-src="chk"><div><div class="ms-name">Operating Checking</div><div class="ms-bal">Available: $62,140</div></div><div class="ms-amt">$6,200</div></div>
+    <div class="ms"        data-src="crd"><div><div class="ms-name">Business Credit Line</div><div class="ms-bal">$40,000 available</div></div><div class="ms-amt">$6,200</div></div>
+    <div class="modal-acts" style="margin-top:4px;">
+      <button class="btn bp" id="confirmGap" style="flex:1;justify-content:center;display:flex;">Move $6,200 from Savings</button>
+      <button class="btn bg" id="cancelGap">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><strong id="tT"></strong><span id="tM"></span></div>
+
+<!-- Load order: data → components → app -->
+<script src="data.js"></script>
+<script src="components.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
